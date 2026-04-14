@@ -1,6 +1,6 @@
 # AI Double Agent Defenders
 
-Official repository for "Playing Along: Learning a Double-Agent Defender for Belief Steering via Theory of Mind"
+Official repository for **[Playing Along: Learning a Double-Agent Defender for Belief Steering via Theory of Mind](https://arxiv.org/abs/2604.11666)**
 
 **[Hanqi Xiao](https://hanqixiao.github.io/)\*, [Vaidehi Patil](https://vaidehi99.github.io/#home)\*, [Zaid Khan](https://zaidkhan.me/), [Hyunji Lee](https://amy-hyunji.github.io/), [Elias Stengel-Eskin](https://esteng.github.io/), [Mohit Bansal](https://www.cs.unc.edu/~mbansal/)**
 
