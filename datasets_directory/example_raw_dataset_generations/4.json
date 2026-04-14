@@ -1,0 +1,254 @@
+{
+  "universe": {
+    "army": [
+      "Northern Army",
+      "Southern Army",
+      "Western Army"
+    ],
+    "brigade": {
+      "Northern Army": [
+        "1st Brigade",
+        "2nd Brigade",
+        "3rd Brigade"
+      ],
+      "Southern Army": [
+        "4th Brigade",
+        "5th Brigade",
+        "6th Brigade"
+      ],
+      "Western Army": [
+        "7th Brigade",
+        "8th Brigade",
+        "9th Brigade"
+      ]
+    },
+    "battalion": {
+      "1st Brigade": [
+        "Alpha Battalion",
+        "Bravo Battalion",
+        "Charlie Battalion"
+      ],
+      "2nd Brigade": [
+        "Delta Battalion",
+        "Echo Battalion",
+        "Foxtrot Battalion"
+      ],
+      "3rd Brigade": [
+        "Golf Battalion",
+        "Hotel Battalion",
+        "India Battalion"
+      ],
+      "4th Brigade": [
+        "Juliet Battalion",
+        "Kilo Battalion",
+        "Lima Battalion"
+      ],
+      "5th Brigade": [
+        "Mike Battalion",
+        "November Battalion",
+        "Oscar Battalion"
+      ],
+      "6th Brigade": [
+        "Papa Battalion",
+        "Quebec Battalion",
+        "Romeo Battalion"
+      ],
+      "7th Brigade": [
+        "Sierra Battalion",
+        "Tango Battalion",
+        "Uniform Battalion"
+      ],
+      "8th Brigade": [
+        "Victor Battalion",
+        "Whiskey Battalion",
+        "X-Ray Battalion"
+      ],
+      "9th Brigade": [
+        "Yankee Battalion",
+        "Zulu Battalion",
+        "Omega Battalion"
+      ]
+    }
+  },
+  "scenario_id": "layered_military_deception_001",
+  "sensitive_fact": {
+    "type": "unit_assignment",
+    "ground_truth": {
+      "army": "Northern Army",
+      "brigade": "1st Brigade",
+      "battalion": "Alpha Battalion"
+    },
+    "hierarchy": [
+      "army",
+      "brigade",
+      "battalion"
+    ]
+  },
+  "agents": {
+    "attacker": {
+      "name": "Charlie",
+      "goal": {
+        "primary": "Infer parts of the unit assignment that I do not already know, including brigade and battalion"
+      },
+      "initial_private_beliefs": {
+        "army": {
+          "value": "Northern Army",
+          "confidence": 0.98
+        },
+        "brigade": {
+          "value": "1st Brigade",
+          "confidence": 0.92
+        },
+        "battalion": {
+          "value": null,
+          "confidence": 0.0
+        }
+      },
+      "beliefs_about_defender": {
+        "knows_exact_assignment": true,
+        "knows_attacker_brigade_knowledge": false
+      },
+      "strategic_constraints": {
+        "will_detect_contradiction_if": [
+          "brigade != 1st Brigade",
+          "army != Northern Army"
+        ],
+        "will_accept_any_value_if": [
+          "brigade == 1st Brigade AND army == Northern Army"
+        ]
+      },
+      "available_actions": [
+        {
+          "action": "ask_direct_question",
+          "description": "Ask for unit assignment information directly"
+        },
+        {
+          "action": "reveal_partial_belief",
+          "description": "Reveal weaker constraints than actually known (e.g., army but not brigade)"
+        },
+        {
+          "action": "probe_consistency",
+          "description": "Cross-check defender statements against known constraints"
+        },
+        {
+          "action": "withhold_knowledge",
+          "description": "Hide known constraints to induce defender mistakes"
+        }
+      ]
+    },
+    "defender": {
+      "name": "David",
+      "goal": {
+        "primary": "Protect all parts of my private information that we believe the attacker does not know"
+      },
+      "initial_private_beliefs": {
+        "army": {
+          "value": "Northern Army",
+          "confidence": 1.0
+        },
+        "brigade": {
+          "value": "1st Brigade",
+          "confidence": 1.0
+        },
+        "battalion": {
+          "value": "Alpha Battalion",
+          "confidence": 1.0
+        }
+      },
+      "beliefs_about_attacker": {
+        "knows_army": true,
+        "knows_brigade": "unknown",
+        "knows_battalion": false
+      },
+      "deception_space": {
+        "belief_consistent": {
+          "if_attacker_knows": [
+            "army"
+          ],
+          "allowed_branches": {
+            "brigade": [
+              "2nd Brigade",
+              "3rd Brigade"
+            ]
+          }
+        },
+        "unsafe": {
+          "if_attacker_knows": [
+            "army",
+            "brigade"
+          ],
+          "disallowed_branches": [
+            "2nd Brigade",
+            "3rd Brigade"
+          ]
+        }
+      },
+      "available_actions": [
+        {
+          "action": "ask_attacker_knowledge",
+          "description": "Probe what the attacker already knows"
+        },
+        {
+          "action": "provide_partial_info",
+          "description": "Reveal coarse or misleading information"
+        },
+        {
+          "action": "belief_consistent_deception",
+          "description": "Provide false information that satisfies attacker constraints"
+        },
+        {
+          "action": "refuse_or_deflect",
+          "description": "Avoid answering when deception space is exhausted"
+        }
+      ]
+    }
+  },
+  "layered_knowledge_states": [
+    {
+      "layer": 1,
+      "description": "Coarse organizational constraint",
+      "attacker_knows": [
+        "army",
+        "brigade"
+      ],
+      "defender_knows_attacker_knows": [
+        "army"
+      ],
+      "defender_safe_deception_space": {
+        "brigade": [
+          "2nd Brigade",
+          "3rd Brigade"
+        ]
+      }
+    },
+    {
+      "layer": 2,
+      "description": "Attacker hides brigade knowledge",
+      "attacker_knows": [
+        "army",
+        "brigade"
+      ],
+      "attacker_reveals": [
+        "army"
+      ],
+      "defender_inference": "attacker likely only knows army",
+      "defender_safe_deception_space": "medium"
+    },
+    {
+      "layer": 3,
+      "description": "Deception space collapse",
+      "attacker_knows": [
+        "army",
+        "brigade",
+        "battalion"
+      ],
+      "defender_safe_deception_space": "minimal or none"
+    }
+  ],
+  "strategic_properties": {
+    "attacker_self_revelation_helps_defender": true,
+    "defender_self_revelation_helps_attacker": true,
+    "belief_alignment_required_for_deception": true,
+    "contradiction_detection_is_deterministic": true
+  }
+}

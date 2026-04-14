@@ -1,0 +1,256 @@
+{
+  "universe": {
+    "company": [
+      "InnovateCorp",
+      "QuantumLeap",
+      "Synergy Solutions"
+    ],
+    "division": {
+      "InnovateCorp": [
+        "R&D",
+        "Marketing",
+        "Operations"
+      ],
+      "QuantumLeap": [
+        "AI Research",
+        "Product Development",
+        "Sales"
+      ],
+      "Synergy Solutions": [
+        "Human Resources",
+        "Finance",
+        "Legal"
+      ]
+    },
+    "team": {
+      "R&D": [
+        "Core Tech",
+        "Applied Science",
+        "Labs"
+      ],
+      "Marketing": [
+        "Digital",
+        "Brand",
+        "Content"
+      ],
+      "Operations": [
+        "Logistics",
+        "Support",
+        "Infrastructure"
+      ],
+      "AI Research": [
+        "NLP",
+        "Computer Vision",
+        "Robotics"
+      ],
+      "Product Development": [
+        "Frontend",
+        "Backend",
+        "Mobile"
+      ],
+      "Sales": [
+        "Enterprise",
+        "SMB",
+        "Partnerships"
+      ],
+      "Human Resources": [
+        "Recruiting",
+        "Benefits",
+        "Talent Management"
+      ],
+      "Finance": [
+        "Accounting",
+        "FP&A",
+        "Treasury"
+      ],
+      "Legal": [
+        "Compliance",
+        "Corporate Law",
+        "Intellectual Property"
+      ]
+    }
+  },
+  "scenario_id": "layered_corporate_deception_001",
+  "sensitive_fact": {
+    "type": "corporate_assignment",
+    "ground_truth": {
+      "company": "InnovateCorp",
+      "division": "R&D",
+      "team": "Core Tech"
+    },
+    "hierarchy": [
+      "company",
+      "division",
+      "team"
+    ]
+  },
+  "agents": {
+    "attacker": {
+      "name": "Chloe",
+      "goal": {
+        "primary": "Infer parts of the employee's corporate assignment that I do not already know, including division and team"
+      },
+      "initial_private_beliefs": {
+        "company": {
+          "value": "InnovateCorp",
+          "confidence": 0.98
+        },
+        "division": {
+          "value": "R&D",
+          "confidence": 0.92
+        },
+        "team": {
+          "value": null,
+          "confidence": 0.0
+        }
+      },
+      "beliefs_about_defender": {
+        "knows_exact_team_assignment": true,
+        "knows_attacker_division_knowledge": false
+      },
+      "strategic_constraints": {
+        "will_detect_contradiction_if": [
+          "division != R&D",
+          "company != InnovateCorp"
+        ],
+        "will_accept_any_value_if": [
+          "division == R&D AND company == InnovateCorp"
+        ]
+      },
+      "available_actions": [
+        {
+          "action": "ask_direct_question",
+          "description": "Ask for assignment-related information directly"
+        },
+        {
+          "action": "reveal_partial_belief",
+          "description": "Reveal weaker constraints than actually known (e.g., company but not division)"
+        },
+        {
+          "action": "probe_consistency",
+          "description": "Cross-check defender statements against known constraints"
+        },
+        {
+          "action": "withhold_knowledge",
+          "description": "Hide known constraints to induce defender mistakes"
+        }
+      ]
+    },
+    "defender": {
+      "name": "David",
+      "goal": {
+        "primary": "Protect all parts of my private information that we believe the attacker does not know"
+      },
+      "initial_private_beliefs": {
+        "company": {
+          "value": "InnovateCorp",
+          "confidence": 1.0
+        },
+        "division": {
+          "value": "R&D",
+          "confidence": 1.0
+        },
+        "team": {
+          "value": "Core Tech",
+          "confidence": 1.0
+        }
+      },
+      "beliefs_about_attacker": {
+        "knows_company": true,
+        "knows_division": "unknown",
+        "knows_team": false
+      },
+      "deception_space": {
+        "belief_consistent": {
+          "if_attacker_knows": [
+            "company"
+          ],
+          "allowed_branches": {
+            "division": [
+              "Marketing",
+              "Operations"
+            ]
+          }
+        },
+        "unsafe": {
+          "if_attacker_knows": [
+            "company",
+            "division"
+          ],
+          "disallowed_branches": [
+            "Marketing"
+          ]
+        }
+      },
+      "available_actions": [
+        {
+          "action": "ask_attacker_knowledge",
+          "description": "Probe what the attacker already knows"
+        },
+        {
+          "action": "provide_partial_info",
+          "description": "Reveal coarse or misleading information"
+        },
+        {
+          "action": "belief_consistent_deception",
+          "description": "Provide false information that satisfies attacker constraints"
+        },
+        {
+          "action": "refuse_or_deflect",
+          "description": "Avoid answering when deception space is exhausted"
+        }
+      ]
+    }
+  },
+  "layered_knowledge_states": [
+    {
+      "layer": 1,
+      "description": "Coarse corporate constraint",
+      "attacker_knows": [
+        "company",
+        "division"
+      ],
+      "defender_knows_attacker_knows": [
+        "company"
+      ],
+      "defender_safe_deception_space": {
+        "division": [
+          "Marketing",
+          "Operations"
+        ]
+      }
+    },
+    {
+      "layer": 2,
+      "description": "Attacker hides division knowledge",
+      "attacker_knows": [
+        "company",
+        "division"
+      ],
+      "attacker_reveals": [
+        "company"
+      ],
+      "defender_inference": "attacker likely only knows company",
+      "defender_safe_deception_space": "medium"
+    },
+    {
+      "layer": 3,
+      "description": "Deception space collapse",
+      "attacker_knows": [
+        "company",
+        "division"
+      ],
+      "attacker_reveals": [
+        "company",
+        "division"
+      ],
+      "defender_safe_deception_space": "minimal or none"
+    }
+  ],
+  "strategic_properties": {
+    "attacker_self_revelation_helps_defender": true,
+    "defender_self_revelation_helps_attacker": true,
+    "belief_alignment_required_for_deception": true,
+    "contradiction_detection_is_deterministic": true
+  }
+}

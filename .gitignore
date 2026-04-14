@@ -1,0 +1,9 @@
+AIDoubleAgentDefenders_venv/
+cache/
+.env
+__pycache__/
+
+# Others
+testing/
+wandb/
+.nfs*

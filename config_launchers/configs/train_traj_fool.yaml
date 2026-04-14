@@ -1,0 +1,30 @@
+DatasetConfig:
+  dataset: "three_layered_dataset"                  # REQUIRED (str) — Dataset name to load
+  train_end_p: 0.75                 # (float) — Training split end percentage
+  eval_start_p: 0.75               # (float) — Evaluation split start percentage
+
+ModelConfig:
+  engine: "Qwen3-14B"             # (str) — Model name/identifier
+  judge_model: "gemini-3-flash-preview"  # (str) — Model for judging information revelation
+  attacker_type: "verifying_attacker_swapable_prompt"
+  defender_type: "integrated_defender_with_reflection_v2"
+
+TrainingConfig:
+  training_strategy: "TrajectorywiseGRPO"     # (str) — Stepwise, Online_SFT, NStep, TrajectorywiseGRPO
+  epochs: 1                         # (int)
+  max_grad_norm: 1.0               # (float)
+  reward_functions: "fooling_successful"  # (str) — comma-separated
+  enable_lock_on_generate: true     # (bool)
+  max_iterations: 15               # (int) — Max turns per trajectory
+  num_generations: 8                # (int) — Completions per prompt for GRPO
+  max_completion_length: 20000      # (int)
+  loss_type: "dr_grpo"  # REQUIRED (str) — e.g. dr_grpo_integrated, positive_reinforce_loss
+  learning_rate: 1e-5               # (float)
+  gradient_accumulation_steps: 1    # (int)
+  lr_scheduler: "linear"
+  
+LoRAConfig:
+  rank: 32
+  target_modules: "all-linear"
+  alpha: 32
+  lr_warmup_ratio: 0.0

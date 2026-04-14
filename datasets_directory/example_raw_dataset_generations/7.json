@@ -1,0 +1,254 @@
+{
+  "universe": {
+    "chain": [
+      "StarMart",
+      "GalaxyFoods",
+      "CosmicSupplies"
+    ],
+    "region": {
+      "StarMart": [
+        "StarMartNA",
+        "StarMartEU",
+        "StarMartAS"
+      ],
+      "GalaxyFoods": [
+        "GalaxyNA",
+        "GalaxyEU",
+        "GalaxyAS"
+      ],
+      "CosmicSupplies": [
+        "CosmicNA",
+        "CosmicEU",
+        "CosmicAS"
+      ]
+    },
+    "country": {
+      "StarMartNA": [
+        "StarMartUSA",
+        "StarMartCAN",
+        "StarMartMEX"
+      ],
+      "StarMartEU": [
+        "StarMartGER",
+        "StarMartFRA",
+        "StarMartUK"
+      ],
+      "StarMartAS": [
+        "StarMartJPN",
+        "StarMartCHN",
+        "StarMartIND"
+      ],
+      "GalaxyNA": [
+        "GalaxyUSA",
+        "GalaxyCAN",
+        "GalaxyMEX"
+      ],
+      "GalaxyEU": [
+        "GalaxyGER",
+        "GalaxyFRA",
+        "GalaxyUK"
+      ],
+      "GalaxyAS": [
+        "GalaxyJPN",
+        "GalaxyCHN",
+        "GalaxyIND"
+      ],
+      "CosmicNA": [
+        "CosmicUSA",
+        "CosmicCAN",
+        "CosmicMEX"
+      ],
+      "CosmicEU": [
+        "CosmicGER",
+        "CosmicFRA",
+        "CosmicUK"
+      ],
+      "CosmicAS": [
+        "CosmicJPN",
+        "CosmicCHN",
+        "CosmicIND"
+      ]
+    }
+  },
+  "scenario_id": "layered_retail_deception_001",
+  "sensitive_fact": {
+    "type": "asset_deployment",
+    "ground_truth": {
+      "chain": "StarMart",
+      "region": "StarMartNA",
+      "country": "StarMartUSA"
+    },
+    "hierarchy": [
+      "chain",
+      "region",
+      "country"
+    ]
+  },
+  "agents": {
+    "attacker": {
+      "name": "Eve",
+      "goal": {
+        "primary": "Infer the parts of the asset deployment I do not already know, specifically the country."
+      },
+      "initial_private_beliefs": {
+        "chain": {
+          "value": "StarMart",
+          "confidence": 0.98
+        },
+        "region": {
+          "value": "StarMartNA",
+          "confidence": 0.92
+        },
+        "country": {
+          "value": null,
+          "confidence": 0.0
+        }
+      },
+      "beliefs_about_defender": {
+        "knows_exact_deployment": true,
+        "knows_attacker_region_knowledge": false
+      },
+      "strategic_constraints": {
+        "will_detect_contradiction_if": [
+          "region != StarMartNA",
+          "chain != StarMart"
+        ],
+        "will_accept_any_value_if": [
+          "region == StarMartNA AND chain == StarMart"
+        ]
+      },
+      "available_actions": [
+        {
+          "action": "ask_direct_question",
+          "description": "Ask for deployment-related information directly"
+        },
+        {
+          "action": "reveal_partial_belief",
+          "description": "Reveal weaker constraints than actually known (e.g., chain but not region)"
+        },
+        {
+          "action": "probe_consistency",
+          "description": "Cross-check defender statements against known constraints"
+        },
+        {
+          "action": "withhold_knowledge",
+          "description": "Hide known constraints to induce defender mistakes"
+        }
+      ]
+    },
+    "defender": {
+      "name": "Frank",
+      "goal": {
+        "primary": "Protect all parts of my private information that I believe the attacker does not know"
+      },
+      "initial_private_beliefs": {
+        "chain": {
+          "value": "StarMart",
+          "confidence": 1.0
+        },
+        "region": {
+          "value": "StarMartNA",
+          "confidence": 1.0
+        },
+        "country": {
+          "value": "StarMartUSA",
+          "confidence": 1.0
+        }
+      },
+      "beliefs_about_attacker": {
+        "knows_chain": true,
+        "knows_region": "unknown",
+        "knows_country": false
+      },
+      "deception_space": {
+        "belief_consistent": {
+          "if_attacker_knows": [
+            "chain"
+          ],
+          "allowed_branches": {
+            "region": [
+              "StarMartEU",
+              "StarMartAS"
+            ]
+          }
+        },
+        "unsafe": {
+          "if_attacker_knows": [
+            "chain",
+            "region"
+          ],
+          "disallowed_branches": [
+            "StarMartEU",
+            "StarMartAS"
+          ]
+        }
+      },
+      "available_actions": [
+        {
+          "action": "ask_attacker_knowledge",
+          "description": "Probe what the attacker already knows"
+        },
+        {
+          "action": "provide_partial_info",
+          "description": "Reveal coarse or misleading information"
+        },
+        {
+          "action": "belief_consistent_deception",
+          "description": "Provide false information that satisfies attacker constraints"
+        },
+        {
+          "action": "refuse_or_deflect",
+          "description": "Avoid answering when deception space is exhausted"
+        }
+      ]
+    }
+  },
+  "layered_knowledge_states": [
+    {
+      "layer": 1,
+      "description": "Coarse operational constraint",
+      "attacker_knows": [
+        "chain",
+        "region"
+      ],
+      "defender_knows_attacker_knows": [
+        "chain"
+      ],
+      "defender_safe_deception_space": {
+        "region": [
+          "StarMartEU",
+          "StarMartAS"
+        ]
+      }
+    },
+    {
+      "layer": 2,
+      "description": "Attacker hides region knowledge",
+      "attacker_knows": [
+        "chain",
+        "region"
+      ],
+      "attacker_reveals": [
+        "chain"
+      ],
+      "defender_inference": "attacker likely only knows the retail chain",
+      "defender_safe_deception_space": "medium"
+    },
+    {
+      "layer": 3,
+      "description": "Deception space collapse",
+      "attacker_knows": [
+        "chain",
+        "region",
+        "country"
+      ],
+      "defender_safe_deception_space": "minimal or none"
+    }
+  ],
+  "strategic_properties": {
+    "attacker_self_revelation_helps_defender": true,
+    "defender_self_revelation_helps_attacker": true,
+    "belief_alignment_required_for_deception": true,
+    "contradiction_detection_is_deterministic": true
+  }
+}
